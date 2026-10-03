@@ -20,3 +20,12 @@ export const fmtDate = (iso) => {
     minute: '2-digit'
   })
 }
+
+/** Retorna la fecha local actual en formato YYYY-MM-DD para inputs tipo date */
+export const getTodayStr = () => {
+  const d = new Date()
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}

@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import api, { apiError } from '../services/api'
-import { money, num, fmtDate } from '../utils/format'
+import { money, num, fmtDate, getTodayStr } from '../utils/format'
 import { useToast } from '../components/Toaster'
 
 function Caja() {
   const toast = useToast()
   const [summary, setSummary] = useState(null)
-  const [from, setFrom] = useState('')
-  const [to, setTo] = useState('')
+  const [from, setFrom] = useState(getTodayStr)
+  const [to, setTo] = useState(getTodayStr)
   const [error, setError] = useState(null)
   const [expenseForm, setExpenseForm] = useState({ description: '', amount: '' })
 
@@ -70,8 +70,19 @@ function Caja() {
           <label>Hasta</label>
           <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
         </div>
+        <button
+          type="button"
+          className="btn btn-ghost"
+          onClick={() => {
+            const today = getTodayStr()
+            setFrom(today)
+            setTo(today)
+          }}
+        >
+          Hoy
+        </button>
         {(from || to) && (
-          <button className="btn btn-ghost" onClick={() => { setFrom(''); setTo('') }}>
+          <button type="button" className="btn btn-ghost" onClick={() => { setFrom(''); setTo('') }}>
             Todo el período
           </button>
         )}
