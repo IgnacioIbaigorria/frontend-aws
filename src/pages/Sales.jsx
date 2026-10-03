@@ -314,7 +314,7 @@ function Sales() {
         ) : filteredSales.length === 0 ? (
           <div className="empty-state"><p>No se encontraron ventas para los filtros seleccionados.</p></div>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap responsive-table">
             <table>
               <thead>
                 <tr>
@@ -329,14 +329,14 @@ function Sales() {
               <tbody>
                 {filteredSales.map((s) => (
                   <tr key={s.id}>
-                    <td>{s.product?.name || '-'}</td>
-                    <td className="num">{s.quantity}</td>
-                    <td className="num">{money(s.unitPrice)}</td>
-                    <td className="num">{money(s.total)}</td>
-                    <td className="muted">
+                    <td data-label="Producto">{s.product?.name || '-'}</td>
+                    <td className="num" data-label="Cantidad">{s.quantity}</td>
+                    <td className="num" data-label="Precio unit.">{money(s.unitPrice)}</td>
+                    <td className="num" data-label="Total">{money(s.total)}</td>
+                    <td className="muted" data-label="Pagos">
                       {s.payments?.map((p) => `${p.paymentMethod}: ${money(p.amount)}`).join(', ') || '-'}
                     </td>
-                    <td className="mono">{fmtDate(s.createdAt)}</td>
+                    <td className="mono" data-label="Fecha">{fmtDate(s.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

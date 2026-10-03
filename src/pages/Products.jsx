@@ -225,7 +225,7 @@ function Products() {
             <p>{search || categoryId ? 'Ningún producto coincide con la búsqueda.' : 'Sin productos aún.'}</p>
           </div>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap responsive-table">
             <table>
               <caption className="sr-only">Productos registrados y su estado de inventario</caption>
               <thead>
@@ -247,23 +247,23 @@ function Products() {
                   const margin = costPrice > 0 ? ((price - costPrice) / costPrice) * 100 : 0
                   return (
                     <tr key={p.id}>
-                      <td>
+                      <td data-label="Nombre">
                         <div className="product-name">{p.name}</div>
                         {p.description && <div className="product-meta">{p.description}</div>}
                       </td>
-                      <td className="num">{money(costPrice)}</td>
-                      <td className="num">{money(price)}</td>
-                      <td className="num" style={{ color: margin >= 0 ? 'var(--success)' : 'var(--brick)' }}>
+                      <td className="num" data-label="Precio costo">{money(costPrice)}</td>
+                      <td className="num" data-label="Precio venta">{money(price)}</td>
+                      <td className="num" data-label="Margen" style={{ color: margin >= 0 ? 'var(--success)' : 'var(--brick)' }}>
                         {margin.toFixed(1)}%
                       </td>
-                      <td className="num">
+                      <td className="num" data-label="Stock">
                         <span className={`stock-tag ${isLow(p) ? 'low' : ''}`} title={`Stock mínimo: ${num(p.minStock)}`}>
                           {num(p.stock)}
                         </span>
                       </td>
-                      <td className="muted">{p.category?.name || '-'}</td>
-                      <td className="muted">{p.tags?.map((t) => t.name).join(', ') || '-'}</td>
-                      <td>
+                      <td className="muted" data-label="Categoría">{p.category?.name || '-'}</td>
+                      <td className="muted" data-label="Etiquetas">{p.tags?.map((t) => t.name).join(', ') || '-'}</td>
+                      <td data-label="Acciones">
                         <div style={{ display: 'flex', gap: '0.375rem' }}>
                           <button className="btn btn-ghost btn-small" onClick={() => handleEdit(p)} aria-label={`Editar ${p.name}`}>Editar</button>
                           <button className="btn btn-danger btn-small" onClick={() => handleDelete(p.id)} aria-label={`Eliminar ${p.name}`}>Eliminar</button>

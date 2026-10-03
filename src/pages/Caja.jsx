@@ -157,7 +157,7 @@ function Caja() {
             {summary.sales?.length === 0 ? (
               <div className="empty-state"><p>Sin ventas{from || to ? ' en el período seleccionado' : ''}.</p></div>
             ) : (
-              <div className="table-wrap">
+              <div className="table-wrap responsive-table">
                 <table>
                   <thead>
                     <tr>
@@ -172,12 +172,12 @@ function Caja() {
                   <tbody>
                     {summary.sales.map((s) => (
                       <tr key={s.id}>
-                        <td>{s.productName || '-'}</td>
-                        <td className="num">{s.quantity}</td>
-                        <td className="num">{money(s.total)}</td>
-                        <td className="num">{money(num(s.costPrice) * num(s.quantity))}</td>
-                        <td className={`num ${s.profit >= 0 ? 'profit-pos' : 'profit-neg'}`}>{money(s.profit)}</td>
-                        <td className="mono">{fmtDate(s.createdAt)}</td>
+                        <td data-label="Producto">{s.productName || '-'}</td>
+                        <td className="num" data-label="Cantidad">{s.quantity}</td>
+                        <td className="num" data-label="Venta">{money(s.total)}</td>
+                        <td className="num" data-label="Costo">{money(num(s.costPrice) * num(s.quantity))}</td>
+                        <td className={`num ${s.profit >= 0 ? 'profit-pos' : 'profit-neg'}`} data-label="Ganancia">{money(s.profit)}</td>
+                        <td className="mono" data-label="Fecha">{fmtDate(s.createdAt)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -191,7 +191,7 @@ function Caja() {
             {summary.expenses?.length === 0 ? (
               <div className="empty-state"><p>Sin gastos{from || to ? ' en el período seleccionado' : ''}.</p></div>
             ) : (
-              <div className="table-wrap">
+              <div className="table-wrap responsive-table">
                 <table>
                   <thead>
                     <tr>
@@ -204,10 +204,10 @@ function Caja() {
                   <tbody>
                     {summary.expenses.map((e) => (
                       <tr key={e.id}>
-                        <td>{e.description}</td>
-                        <td className="num">{money(e.amount)}</td>
-                        <td className="mono">{fmtDate(e.createdAt)}</td>
-                        <td>
+                        <td data-label="Descripción">{e.description}</td>
+                        <td className="num" data-label="Monto">{money(e.amount)}</td>
+                        <td className="mono" data-label="Fecha">{fmtDate(e.createdAt)}</td>
+                        <td data-label="Acciones">
                           <button className="btn btn-danger btn-small" onClick={() => handleDeleteExpense(e.id)}>
                             Eliminar
                           </button>

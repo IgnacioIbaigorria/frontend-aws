@@ -85,7 +85,7 @@ function Tags() {
         {tags.length === 0 ? (
           <div className="empty-state"><p>Sin etiquetas aún.</p></div>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap responsive-table">
             <table>
               <thead>
                 <tr>
@@ -96,8 +96,8 @@ function Tags() {
               <tbody>
                 {tags.map((t) => (
                   <tr key={t.id}>
-                    <td className="product-name">{t.name}</td>
-                    <td>
+                    <td className="product-name" data-label="Nombre">{t.name}</td>
+                    <td data-label="Acciones">
                       <div style={{ display: 'flex', gap: '0.375rem' }}>
                         <button className="btn btn-ghost btn-small" onClick={() => handleEdit(t)}>Editar</button>
                         <button className="btn btn-danger btn-small" onClick={() => handleDelete(t.id)}>Eliminar</button>

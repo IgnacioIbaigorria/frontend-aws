@@ -153,7 +153,7 @@ function Reposicion() {
         {reposiciones.length === 0 ? (
           <div className="empty-state"><p>Sin reposiciones registradas.</p></div>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap responsive-table">
             <table>
               <thead>
                 <tr>
@@ -167,11 +167,11 @@ function Reposicion() {
               <tbody>
                 {reposiciones.map((r) => (
                   <tr key={r.id}>
-                    <td>{r.product?.name || '-'}</td>
-                    <td className="num">{r.quantity}</td>
-                    <td className="muted">{r.supplier || '-'}</td>
-                    <td className="num">{r.cost ? money(r.cost) : '-'}</td>
-                    <td className="mono">{fmtDate(r.createdAt)}</td>
+                    <td data-label="Producto">{r.product?.name || '-'}</td>
+                    <td className="num" data-label="Cantidad">{r.quantity}</td>
+                    <td className="muted" data-label="Proveedor">{r.supplier || '-'}</td>
+                    <td className="num" data-label="Costo">{r.cost ? money(r.cost) : '-'}</td>
+                    <td className="mono" data-label="Fecha">{fmtDate(r.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

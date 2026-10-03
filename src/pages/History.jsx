@@ -52,7 +52,7 @@ function History() {
         {history.length === 0 ? (
           <div className="empty-state"><p>Sin movimientos registrados.</p></div>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap responsive-table">
             <table>
               <thead>
                 <tr>
@@ -66,11 +66,11 @@ function History() {
               <tbody>
                 {history.map((h) => (
                   <tr key={h.id}>
-                    <td>{h.product?.name || '-'}</td>
-                    <td className="mono">{h.field}</td>
-                    <td className="muted">{h.oldValue ?? '-'}</td>
-                    <td>{h.newValue ?? '-'}</td>
-                    <td className="mono">{fmtDate(h.createdAt)}</td>
+                    <td data-label="Producto">{h.product?.name || '-'}</td>
+                    <td className="mono" data-label="Campo">{h.field}</td>
+                    <td className="muted" data-label="Valor anterior">{h.oldValue ?? '-'}</td>
+                    <td data-label="Nuevo valor">{h.newValue ?? '-'}</td>
+                    <td className="mono" data-label="Fecha">{fmtDate(h.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

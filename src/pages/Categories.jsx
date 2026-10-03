@@ -102,7 +102,7 @@ function Categories() {
         {categories.length === 0 ? (
           <div className="empty-state"><p>Sin categorías aún.</p></div>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap responsive-table">
             <table>
               <thead>
                 <tr>
@@ -114,9 +114,9 @@ function Categories() {
               <tbody>
                 {categories.map((c) => (
                   <tr key={c.id}>
-                    <td className="product-name">{c.name}</td>
-                    <td className="muted">{c.description || '-'}</td>
-                    <td>
+                    <td className="product-name" data-label="Nombre">{c.name}</td>
+                    <td className="muted" data-label="Descripción">{c.description || '-'}</td>
+                    <td data-label="Acciones">
                       <div style={{ display: 'flex', gap: '0.375rem' }}>
                         <button className="btn btn-ghost btn-small" onClick={() => handleEdit(c)}>Editar</button>
                         <button className="btn btn-danger btn-small" onClick={() => handleDelete(c.id)}>Eliminar</button>
