@@ -1,0 +1,210 @@
+# Gestión de Stock — Frontend
+
+Aplicación web para administrar productos, ventas, caja e inventario desde un único panel. El frontend está publicado y se puede probar en:
+
+**[Abrir la aplicación en producción](https://d1hjojyfabiyi5.cloudfront.net/)**
+
+El backend que provee la API vive en un repositorio separado:
+
+**[Ver backend NestJS](https://github.com/IgnacioIbaigorria/backend_NestJS)**
+
+## ¿Qué problema resuelve?
+
+La aplicación centraliza tareas que normalmente se llevan en planillas o registros separados:
+
+- Mantener actualizado el catálogo de productos.
+- Consultar precios, costos, stock mínimo y disponibilidad.
+- Registrar ventas con uno o varios medios de pago.
+- Detectar productos con stock bajo y registrar reposiciones.
+- Administrar categorías y etiquetas.
+- Consultar movimientos históricos de productos.
+- Revisar ventas, gastos, ganancias y balance neto de caja por período.
+
+El objetivo es ofrecer una herramienta simple para pequeños comercios o emprendimientos que necesitan una vista operativa del inventario sin depender de procesos manuales.
+
+## Funcionalidades
+
+- **Productos:** alta, edición, eliminación, búsqueda y filtro por categoría.
+- **Inventario:** stock actual, stock mínimo, margen y alertas de bajo stock.
+- **Ventas:** búsqueda de productos, cantidades, pagos divididos y validación del total cobrado.
+- **Caja:** resumen de ventas, ganancias, gastos y balance neto.
+- **Reposición:** registro de cantidades, proveedores y costos.
+- **Categorías y etiquetas:** organización del catálogo.
+- **Historial:** seguimiento de cambios realizados sobre los productos.
+- **Diseño responsive:** navegación y tablas adaptadas a pantallas móviles.
+
+## Stack tecnológico
+
+- [React 18](https://react.dev/)
+- [Vite 5](https://vitejs.dev/)
+- [React Router 6](https://reactrouter.com/)
+- [Axios](https://axios-http.com/)
+- AWS S3
+- AWS CloudFront
+- GitHub Actions
+
+El proyecto usa JavaScript y JSX, sin TypeScript.
+
+## Arquitectura
+
+```text
+┌─────────────────────┐
+│        Usuario      │
+│   navegador web     │
+└──────────┬──────────┘
+           │ HTTPS
+           ▼
+┌─────────────────────┐
+│      CloudFront     │
+│  CDN + distribución │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│         S3          │
+│  archivos estáticos │
+│    React + Vite     │
+└─────────────────────┘
+           
+┌─────────────────────┐
+│ CloudFront /api     │
+│ ruta hacia la API   │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Backend NestJS      │
+│ repositorio separado│
+└─────────────────────┘
+```
+
+La aplicación se compila como una SPA estática. Vite genera los archivos finales en `dist/`, que se publican en S3 y se distribuyen mediante CloudFront.
+
+Las llamadas HTTP del frontend se centralizan en `src/services/api.js` y utilizan la ruta base `/api`. En desarrollo, Vite puede redirigir esa ruta al backend local en `http://localhost:3000`. En producción, la distribución debe enrutar `/api` hacia el backend desplegado.
+
+Para conocer la implementación de la API, los modelos, endpoints, base de datos y despliegue del servidor, consultá el [repositorio del backend NestJS](https://github.com/IgnacioIbaigorria/backend_NestJS).
+
+## Estructura principal
+
+```text
+.
+├── .github/
+│   └── workflows/
+│       └── deploy.yml       # Build y despliegue automático
+├── src/
+│   ├── components/          # Componentes compartidos
+│   ├── pages/               # Pantallas de la aplicación
+│   ├── services/            # Cliente HTTP y servicios
+│   ├── utils/               # Utilidades de formato
+│   ├── App.jsx              # Rutas y layout principal
+│   ├── main.jsx             # Punto de entrada
+│   └── index.css            # Sistema visual y responsive
+├── index.html
+├── vite.config.js
+├── package.json
+└── yarn.lock
+```
+
+## Ejecutar localmente
+
+### Requisitos
+
+- Node.js
+- Yarn
+- Backend NestJS ejecutándose localmente en el puerto `3000`, o una API accesible mediante la ruta configurada
+
+### Instalación
+
+```bash
+yarn install --frozen-lockfile
+```
+
+### Desarrollo
+
+```bash
+yarn dev
+```
+
+La aplicación estará disponible en:
+
+```text
+http://localhost:3001
+```
+
+Durante el desarrollo, Vite configura el proxy `/api` hacia:
+
+```text
+http://localhost:3000
+```
+
+### Compilar para producción
+
+```bash
+yarn build
+```
+
+El resultado se genera en `dist/`.
+
+### Previsualizar el build
+
+```bash
+yarn preview
+```
+
+## Despliegue
+
+El workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) automatiza el proceso:
+
+1. Instala las dependencias con `yarn install --frozen-lockfile`.
+2. Ejecuta `yarn build`.
+3. Guarda `dist/` como artifact.
+4. En pushes a `main`, sincroniza el artifact con S3.
+5. Invalida la caché de CloudFront cuando está configurado `CLOUDFRONT_ID`.
+
+El despliegue de producción necesita estos secrets en GitHub Actions:
+
+| Secret | Uso |
+|---|---|
+| `S3_BUCKET` | Bucket donde se publica `dist/` |
+| `AWS_ROLE_ARN` | Rol IAM para autenticación OIDC, recomendado |
+| `AWS_ACCESS_KEY_ID` | Alternativa a OIDC |
+| `AWS_SECRET_ACCESS_KEY` | Alternativa a OIDC |
+| `CLOUDFRONT_ID` | Distribución cuya caché se invalida |
+
+Se recomienda utilizar OIDC con `AWS_ROLE_ARN` en lugar de almacenar claves AWS permanentes. La configuración detallada de AWS está documentada en [`FRONTEND_DEPLOY.md`](FRONTEND_DEPLOY.md).
+
+## React Router y CloudFront
+
+Como la aplicación utiliza `BrowserRouter`, las rutas internas deben devolver `index.html` para que React Router pueda resolverlas. La configuración de hosting debe contemplar el fallback de la SPA para rutas como:
+
+```text
+/products
+/sales
+/caja
+/reposicion
+/history
+```
+
+Sin ese fallback, la navegación puede funcionar desde la página inicial, pero una recarga directa en una ruta interna puede devolver `404`.
+
+## Backend
+
+Este repositorio contiene únicamente el cliente web. La API y la lógica del servidor están en:
+
+**[IgnacioIbaigorria/backend_NestJS](https://github.com/IgnacioIbaigorria/backend_NestJS)**
+
+Ese repositorio debe consultarse para:
+
+- Endpoints disponibles.
+- Entidades y relaciones.
+- Reglas de negocio.
+- Persistencia y base de datos.
+- Configuración de CORS.
+- Despliegue del backend.
+
+## Estado del proyecto
+
+- Frontend desplegado en AWS CloudFront.
+- Archivos estáticos almacenados en AWS S3.
+- Deploy automatizado con GitHub Actions.
+- Backend mantenido en un repositorio NestJS independiente.
