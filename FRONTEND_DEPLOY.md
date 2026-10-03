@@ -3,8 +3,8 @@
 ## Estado actual
 
 - **Frontend**: React + Vite (este repo). Se instala con **yarn** (hay `yarn.lock`, no `package-lock.json`) y se compila con `yarn build` → genera la carpeta `dist/`.
-- **Backend**: NestJS **ya desplegado en EC2** (`http://34.227.197.241:3000`).
-- **API URL**: ya está configurada en `src/services/api.js` → **no hay que tocar nada del código**.
+- **Backend**: NestJS desplegado por separado en EC2.
+- **API URL**: el frontend usa la ruta relativa `/api` en `src/services/api.js`. En desarrollo, Vite la proxifica a `http://localhost:3000`; en producción, CloudFront debe enrutar `/api/*` hacia el backend.
 
 ## Arquitectura
 
@@ -17,7 +17,7 @@
 │  CloudFront (CDN)│◀──────▶│  S3 (Frontend)   │
 │  HTTPS + caché   │        │  React SPA       │
 └────────┬─────────┘        └──────────────────┘
-         │ (navegador llama a la API)
+         │ `/api/*` → API origin
          ▼
 ┌──────────────────┐
 │  EC2 (Backend)   │
@@ -25,7 +25,7 @@
 └──────────────────┘
 ```
 
-El navegador carga el SPA desde S3/CloudFront y el SPA llama directamente a la API de EC2 (URL ya definida en `src/services/api.js`).
+El navegador carga el SPA desde S3/CloudFront. Las peticiones `/api/*` deben tener un comportamiento específico en CloudFront que las envíe al backend. Así el navegador usa el mismo dominio HTTPS y no depende de una URL HTTP hardcodeada.
 
 ---
 
@@ -264,13 +264,12 @@ jobs:
 
 ## Paso 6: Verificar el backend en EC2 (ya desplegado)
 
-La API URL ya está en `src/services/api.js` → `http://34.227.197.241:3000`. Para que el frontend desplegado funcione, verifica:
+El frontend usa `/api`, por lo que para que el frontend desplegado funcione, verifica:
 
-1. **Security group de EC2**: debe permitir tráfico **entrante** en el puerto `3000` desde `0.0.0.0/0` (la API la llama el navegador, no el servidor).
-2. **CORS en el backend**: el backend NestJS debe permitir el origen del frontend (`http://tu-bucket.s3-website-us-east-1.amazonaws.com` o el dominio de CloudFront). Si no, el navegador bloquea las peticiones.
-3. ⚠️ **Mixed content**: si sirves el frontend por **HTTPS** (CloudFront), el navegador **bloqueará** las llamadas a `http://34.227.197.241:3000`. Opciones:
-   - Probar primero con el endpoint HTTP del S3 website (no hay mixed content), o
-   - Poner el backend detrás de HTTPS (nginx + certbot, ALB, o CloudFront delante de EC2) y cambiar la URL en `src/services/api.js` a `https://...`.
+1. **CloudFront**: debe existir un behavior `/api/*` antes del behavior por defecto, apuntando al origin del backend. Ese behavior debe permitir los métodos HTTP usados por la app (`GET`, `POST`, `PATCH`, `DELETE`, `OPTIONS`) y reenviar query strings, headers y cookies necesarios.
+2. **HTTPS hacia el backend**: el origin de `/api/*` debe ser accesible mediante HTTPS o estar protegido detrás de un reverse proxy/Load Balancer con TLS. Evita que el navegador bloquee la aplicación por mixed content.
+3. **CORS en el backend**: NestJS debe permitir el origen `https://d1hjojyfabiyi5.cloudfront.net`. Si `/api` se sirve bajo el mismo dominio, CORS deja de ser un problema para esas peticiones.
+4. **Security group de EC2**: permite tráfico únicamente desde el reverse proxy, Load Balancer o CloudFront configurado, según tu arquitectura; evita abrir el puerto del backend más de lo necesario.
 
 ### Reiniciar el backend en EC2
 

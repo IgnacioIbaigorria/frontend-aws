@@ -2,8 +2,34 @@ import axios from 'axios'
 
 const api = axios.create({
   baseURL: '/api',
+  timeout: 15000,
   headers: { 'Content-Type': 'application/json' }
 })
+
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const config = error.config
+    const method = config?.method?.toLowerCase()
+    const status = error.response?.status
+    const retryableStatus = !status || [408, 429, 500, 502, 503, 504].includes(status)
+
+    if (!config || method !== 'get' || !retryableStatus) {
+      return Promise.reject(error)
+    }
+
+    config.__retryCount = config.__retryCount || 0
+    if (config.__retryCount >= 2) {
+      return Promise.reject(error)
+    }
+
+    config.__retryCount += 1
+    await wait(config.__retryCount * 750)
+    return api(config)
+  }
+)
 
 export default api
 
