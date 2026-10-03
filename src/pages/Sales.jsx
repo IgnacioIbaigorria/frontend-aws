@@ -13,8 +13,8 @@ function Sales() {
   const [quantity, setQuantity] = useState(1)
   const [payments, setPayments] = useState([{ amount: '', paymentMethod: 'efectivo' }])
   const [filterProduct, setFilterProduct] = useState('')
-  const [filterFrom, setFilterFrom] = useState('')
-  const [filterTo, setFilterTo] = useState('')
+  const [filterFrom, setFilterFrom] = useState(getTodayStr)
+  const [filterTo, setFilterTo] = useState(getTodayStr)
 
   useEffect(() => {
     loadSales()
