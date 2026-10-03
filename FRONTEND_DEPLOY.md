@@ -200,6 +200,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    env:
+      AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+      CLOUDFRONT_ID: ${{ secrets.CLOUDFRONT_ID }}
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -207,13 +210,13 @@ jobs:
           name: frontend-dist
           path: dist/
       - name: Configure AWS credentials (OIDC)
-        if: ${{ secrets.AWS_ROLE_ARN != '' }}
+        if: env.AWS_ROLE_ARN != ''
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
       - name: Configure AWS credentials (static keys)
-        if: ${{ secrets.AWS_ROLE_ARN == '' }}
+        if: env.AWS_ROLE_ARN == ''
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -222,7 +225,7 @@ jobs:
       - name: Sync to S3
         run: aws s3 sync dist/ "s3://${{ secrets.S3_BUCKET }}" --delete
       - name: Invalidate CloudFront cache
-        if: ${{ secrets.CLOUDFRONT_ID != '' }}
+        if: env.CLOUDFRONT_ID != ''
         run: aws cloudfront create-invalidation --distribution-id "${{ secrets.CLOUDFRONT_ID }}" --paths "/*"
 ```
 
