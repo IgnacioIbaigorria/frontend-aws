@@ -19,8 +19,14 @@ function Caja() {
   const loadCaja = async () => {
     try {
       const params = {}
-      if (from) params.from = from
-      if (to) params.to = to
+      if (from) {
+        // Inicio del día local (00:00:00)
+        params.from = new Date(`${from}T00:00:00`).toISOString()
+      }
+      if (to) {
+        // Final del día local (23:59:59.999)
+        params.to = new Date(`${to}T23:59:59.999`).toISOString()
+      }
       const res = await api.get('/caja/summary', { params })
       setSummary(res.data)
       setError(null)

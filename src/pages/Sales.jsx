@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import api, { apiError } from '../services/api'
-import { money, num, fmtDate } from '../utils/format'
+import { money, num, fmtDate, getTodayStr } from '../utils/format'
 import { useToast } from '../components/Toaster'
 
 function Sales() {
@@ -12,6 +12,9 @@ function Sales() {
   const [selected, setSelected] = useState(null)
   const [quantity, setQuantity] = useState(1)
   const [payments, setPayments] = useState([{ amount: '', paymentMethod: 'efectivo' }])
+  const [filterProduct, setFilterProduct] = useState('')
+  const [filterFrom, setFilterFrom] = useState('')
+  const [filterTo, setFilterTo] = useState('')
 
   useEffect(() => {
     loadSales()
@@ -59,6 +62,28 @@ function Sales() {
   const paid = payments.reduce((sum, p) => sum + num(p.amount), 0)
   const remaining = total - paid
   const isBalanced = Math.abs(remaining) <= 0.001
+
+  // Filtro en tiempo real del historial de ventas por producto y fecha
+  const filteredSales = useMemo(() => {
+    return sales.filter((s) => {
+      if (filterProduct.trim()) {
+        const pName = (s.product?.name || '').toLowerCase()
+        if (!pName.includes(filterProduct.trim().toLowerCase())) return false
+      }
+      if (filterFrom || filterTo) {
+        if (!s.createdAt) return false
+        const d = new Date(s.createdAt)
+        const saleDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        if (filterFrom && saleDate < filterFrom) return false
+        if (filterTo && saleDate > filterTo) return false
+      }
+      return true
+    })
+  }, [sales, filterProduct, filterFrom, filterTo])
+
+  const filteredTotal = useMemo(() => {
+    return filteredSales.reduce((sum, s) => sum + num(s.total), 0)
+  }, [filteredSales])
 
   const selectProduct = (p) => {
     setSelected(p)
@@ -223,9 +248,71 @@ function Sales() {
       </div>
 
       <div className="card">
-        <h3 className="card-title">Historial de ventas</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+          <h3 className="card-title" style={{ marginBottom: 0 }}>Historial de ventas</h3>
+          {(filterProduct || filterFrom || filterTo) && (
+            <span className="product-meta">
+              {filteredSales.length} de {sales.length} ventas · Total: <strong>{money(filteredTotal)}</strong>
+            </span>
+          )}
+        </div>
+
+        <div className="date-filters" style={{ marginBottom: '1rem' }}>
+          <div className="form-group" style={{ minWidth: '180px', flex: '1 1 180px' }}>
+            <label>Buscar producto</label>
+            <input
+              type="text"
+              placeholder="Filtrar por nombre..."
+              value={filterProduct}
+              onChange={(e) => setFilterProduct(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label>Desde</label>
+            <input
+              type="date"
+              value={filterFrom}
+              onChange={(e) => setFilterFrom(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label>Hasta</label>
+            <input
+              type="date"
+              value={filterTo}
+              onChange={(e) => setFilterTo(e.target.value)}
+            />
+          </div>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => {
+              const today = getTodayStr()
+              setFilterFrom(today)
+              setFilterTo(today)
+            }}
+          >
+            Hoy
+          </button>
+          {(filterProduct || filterFrom || filterTo) && (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => {
+                setFilterProduct('')
+                setFilterFrom('')
+                setFilterTo('')
+              }}
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+
         {sales.length === 0 ? (
           <div className="empty-state"><p>Sin ventas registradas.</p></div>
+        ) : filteredSales.length === 0 ? (
+          <div className="empty-state"><p>No se encontraron ventas para los filtros seleccionados.</p></div>
         ) : (
           <div className="table-wrap">
             <table>
@@ -240,7 +327,7 @@ function Sales() {
                 </tr>
               </thead>
               <tbody>
-                {sales.map((s) => (
+                {filteredSales.map((s) => (
                   <tr key={s.id}>
                     <td>{s.product?.name || '-'}</td>
                     <td className="num">{s.quantity}</td>
