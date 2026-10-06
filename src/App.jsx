@@ -3,6 +3,8 @@ import { ToastProvider } from './components/Toaster'
 import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import { useAuth } from './context/AuthContext'
+import { useTheme } from './context/ThemeContext'
+import Icon from './components/Icon'
 import Products from './pages/Products'
 import Sales from './pages/Sales'
 import Caja from './pages/Caja'
@@ -12,14 +14,30 @@ import Reposicion from './pages/Reposicion'
 import History from './pages/History'
 
 const NAV = [
-  { to: '/products', label: 'Productos' },
-  { to: '/sales', label: 'Ventas' },
-  { to: '/caja', label: 'Caja' },
-  { to: '/categories', label: 'Categorías' },
-  { to: '/tags', label: 'Etiquetas' },
-  { to: '/reposicion', label: 'Reposición' },
-  { to: '/history', label: 'Historial' }
+  { to: '/products', label: 'Productos', icon: 'box' },
+  { to: '/sales', label: 'Ventas', icon: 'sales' },
+  { to: '/caja', label: 'Caja', icon: 'caja' },
+  { to: '/categories', label: 'Categorías', icon: 'categories' },
+  { to: '/tags', label: 'Etiquetas', icon: 'tags' },
+  { to: '/reposicion', label: 'Reposición', icon: 'reposicion' },
+  { to: '/history', label: 'Historial', icon: 'history' },
 ]
+
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme()
+  const isDark = theme === 'dark'
+
+  return (
+    <button
+      className="theme-toggle"
+      onClick={toggleTheme}
+      aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+      title={isDark ? 'Modo claro' : 'Modo oscuro'}
+    >
+      <Icon name={isDark ? 'sun' : 'moon'} size={18} />
+    </button>
+  )
+}
 
 function AppShell() {
   const location = useLocation()
@@ -28,28 +46,32 @@ function AppShell() {
   return (
     <div className="app">
       <aside className="sidebar">
-          <div className="brand">
-            <span className="brand-mark" aria-hidden="true" />
-            <div>
-              <h1 className="logo">Stock</h1>
-              <p className="brand-caption">Control de inventario</p>
-            </div>
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true" />
+          <div>
+            <h1 className="logo">Stock</h1>
+            <p className="brand-caption">Control de inventario</p>
           </div>
-          <nav aria-label="Navegación principal">
-            <ul className="nav-list">
+        </div>
+        <nav aria-label="Navegación principal">
+          <ul className="nav-list">
             {NAV.map((item) => (
               <li key={item.to}>
                 <NavLink to={item.to} className={({ isActive }) => (isActive ? 'active' : undefined)}>
+                  <Icon name={item.icon} size={16} />
                   {item.label}
                 </NavLink>
               </li>
             ))}
-            </ul>
-          </nav>
-          <div className="session-panel">
-            <span className="session-user">{user?.username || 'Usuario'}</span>
-            <button className="btn btn-ghost btn-small session-logout" onClick={signOut}>Cerrar sesión</button>
-          </div>
+          </ul>
+        </nav>
+        <div className="session-panel">
+          <span className="session-user">{user?.username || 'Usuario'}</span>
+          <button className="btn btn-ghost btn-small session-logout" onClick={signOut}>
+            <Icon name="logout" size={14} />
+            Cerrar sesión
+          </button>
+        </div>
       </aside>
 
       <div className="main-wrap">
@@ -59,11 +81,18 @@ function AppShell() {
             <span className="logo">Stock</span>
             <span className="brand-caption">Control de inventario</span>
           </div>
-          <button className="btn btn-ghost btn-small mobile-logout" onClick={signOut}>Salir</button>
+          <div className="topbar-actions">
+            <ThemeToggle />
+            <button className="btn btn-ghost btn-small mobile-logout" onClick={signOut}>
+              <Icon name="logout" size={14} />
+              Salir
+            </button>
+          </div>
         </header>
         <nav className="mobile-nav" aria-label="Navegación principal">
           {NAV.map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'active' : undefined)}>
+              <Icon name={item.icon} size={14} />
               {item.label}
             </NavLink>
           ))}

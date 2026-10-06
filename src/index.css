@@ -17,6 +17,35 @@
   --font-display: 'Fraunces', Georgia, serif;
   --font-ui: 'Archivo', system-ui, -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --shadow-sm: 0 1px 2px rgba(24, 36, 32, 0.05);
+  --shadow-md: 0 4px 12px rgba(24, 36, 32, 0.08);
+  --shadow-lg: 0 12px 32px rgba(24, 36, 32, 0.12);
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+}
+
+/* ——— Dark theme ——— */
+[data-theme="dark"] {
+  --paper: #0F172A;
+  --card: #1E293B;
+  --ink: #F1F5F9;
+  --ink-soft: #94A3B8;
+  --pine: #34D399;
+  --pine-deep: #059669;
+  --marigold: #FBBF24;
+  --marigold-soft: #451A03;
+  --marigold-line: #92400E;
+  --brick: #F87171;
+  --brick-soft: #450A0A;
+  --brick-line: #991B1B;
+  --line: #334155;
+  --success: #4ADE80;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -32,6 +61,36 @@ body {
   line-height: 1.5;
   min-width: 320px;
   -webkit-font-smoothing: antialiased;
+  transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+/* ——— Theme toggle ——— */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(237, 239, 230, 0.25);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: rgba(237, 239, 230, 0.8);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex: none;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-color: rgba(237, 239, 230, 0.4);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
 }
 
 :focus-visible {
@@ -53,6 +112,7 @@ body {
   position: fixed;
   height: 100vh;
   overflow-y: auto;
+  transition: background-color var(--transition-base);
 }
 
 .brand {
@@ -95,14 +155,22 @@ body {
 }
 
 .nav-list a {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
   padding: 0.5625rem 0.875rem 0.5625rem 1rem;
   color: rgba(237, 239, 230, 0.72);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
   border-left: 3px solid transparent;
-  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.nav-list a .icon {
+  flex: none;
+  opacity: 0.8;
 }
 
 .nav-list a:hover {
@@ -147,12 +215,14 @@ body {
   font-family: var(--font-display);
   font-size: 1.75rem;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .page-sub {
-  margin-top: 0.25rem;
+  margin-top: 0.375rem;
   font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--ink-soft);
 }
 
@@ -164,9 +234,11 @@ body {
 .card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 1.375rem 1.5rem;
   margin-bottom: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-base), border-color var(--transition-base);
 }
 
 .card-title {
@@ -211,12 +283,12 @@ input, select {
   min-height: 44px;
   padding: 0.5625rem 0.75rem;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font: inherit;
   font-size: 0.875rem;
-  background: #fff;
+  background: var(--card);
   color: var(--ink);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-base);
 }
 
 button, a, input, select {
@@ -238,12 +310,12 @@ input::placeholder {
   min-height: 44px;
   padding: 0.5625rem 1.125rem;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font: inherit;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .btn-primary {
@@ -394,6 +466,7 @@ th, td {
   padding: 0.625rem 0.75rem;
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
+  transition: background-color var(--transition-base);
 }
 
 tbody tr:last-child td {
@@ -404,10 +477,16 @@ th {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 tbody tr:hover {
   background: rgba(35, 70, 58, 0.04);
+}
+
+[data-theme="dark"] tbody tr:hover {
+  background: rgba(52, 211, 153, 0.06);
 }
 
 td.num, th.num {
@@ -434,6 +513,7 @@ td.muted {
   border-radius: 999px;
   background: var(--card);
   font-variant-numeric: tabular-nums;
+  transition: background-color var(--transition-base), border-color var(--transition-base);
 }
 
 .stock-tag.low {
@@ -450,7 +530,7 @@ td.muted {
   gap: 1px;
   background: var(--line);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   margin-bottom: 1.25rem;
 }
@@ -458,6 +538,7 @@ td.muted {
 .ledger-cell {
   background: var(--card);
   padding: 1.125rem 1.25rem;
+  transition: background-color var(--transition-base);
 }
 
 .ledger-label {
@@ -465,13 +546,16 @@ td.muted {
   font-weight: 600;
   color: var(--ink-soft);
   margin-bottom: 0.375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .ledger-value {
   font-family: var(--font-display);
   font-size: 1.625rem;
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
 }
 
@@ -494,9 +578,10 @@ td.muted {
 .lowstock {
   background: var(--marigold-soft);
   border: 1px solid var(--marigold-line);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 1.125rem 1.25rem;
   margin-bottom: 1.25rem;
+  transition: background-color var(--transition-base), border-color var(--transition-base);
 }
 
 .lowstock-title {
@@ -545,13 +630,13 @@ td.muted {
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: #fff;
+  background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   max-height: 240px;
   overflow-y: auto;
   z-index: 100;
-  box-shadow: 0 8px 24px rgba(24, 36, 32, 0.12);
+  box-shadow: var(--shadow-md);
 }
 
 .product-result-item {
@@ -683,10 +768,10 @@ td.muted {
   background: var(--pine);
   color: #F7F8F1;
   padding: 0.75rem 1rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-weight: 500;
-  box-shadow: 0 8px 24px rgba(24, 36, 32, 0.18);
+  box-shadow: var(--shadow-md);
   animation: toast-in 0.25s ease;
   max-width: 360px;
 }
@@ -807,6 +892,7 @@ td.muted {
     min-height: 44px;
     display: inline-flex;
     align-items: center;
+    gap: 0.375rem;
     padding: 0.375rem 0.75rem;
     border-radius: 999px;
     color: rgba(237, 239, 230, 0.75);
