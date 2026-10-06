@@ -12,6 +12,7 @@ import Categories from './pages/Categories'
 import Tags from './pages/Tags'
 import Reposicion from './pages/Reposicion'
 import History from './pages/History'
+import Users from './pages/Users'
 
 const NAV = [
   { to: '/products', label: 'Productos', icon: 'box' },
@@ -21,6 +22,7 @@ const NAV = [
   { to: '/tags', label: 'Etiquetas', icon: 'tags' },
   { to: '/reposicion', label: 'Reposición', icon: 'reposicion' },
   { to: '/history', label: 'Historial', icon: 'history' },
+  { to: '/users', label: 'Usuarios', icon: 'users', adminOnly: true },
 ]
 
 function ThemeToggle() {
@@ -42,6 +44,8 @@ function ThemeToggle() {
 function AppShell() {
   const location = useLocation()
   const { user, signOut } = useAuth()
+  const isAdmin = user?.groups?.includes('ADMIN')
+  const visibleNav = NAV.filter((item) => !item.adminOnly || isAdmin)
 
   return (
     <div className="app">
@@ -55,7 +59,7 @@ function AppShell() {
         </div>
         <nav aria-label="Navegación principal">
           <ul className="nav-list">
-            {NAV.map((item) => (
+            {visibleNav.map((item) => (
               <li key={item.to}>
                 <NavLink to={item.to} className={({ isActive }) => (isActive ? 'active' : undefined)}>
                   <Icon name={item.icon} size={16} />
@@ -90,7 +94,7 @@ function AppShell() {
           </div>
         </header>
         <nav className="mobile-nav" aria-label="Navegación principal">
-          {NAV.map((item) => (
+          {visibleNav.map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'active' : undefined)}>
               <Icon name={item.icon} size={14} />
               {item.label}
@@ -108,6 +112,7 @@ function AppShell() {
             <Route path="/tags" element={<Tags />} />
             <Route path="/reposicion" element={<Reposicion />} />
             <Route path="/history" element={<History />} />
+            <Route path="/users" element={isAdmin ? <Users /> : <Navigate to="/products" replace />} />
             <Route path="*" element={<Navigate to="/products" replace />} />
           </Routes>
         </main>

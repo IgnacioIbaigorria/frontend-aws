@@ -24,25 +24,37 @@ export const getAccessToken = () => accessToken
 
 export const getCurrentUser = () => user
 
-export const setAuthSession = ({ accessToken: nextAccessToken, refreshToken, expiresIn }) => {
+export const setAuthSession = ({ accessToken: nextAccessToken, refreshToken, expiresIn, username }) => {
   accessToken = nextAccessToken
   const payload = decodeJwtPayload(nextAccessToken)
   user = payload
     ? {
-        username: payload.username || payload['cognito:username'] || 'Usuario',
+        username: payload.username || payload['cognito:username'] || username || 'Usuario',
         groups: payload['cognito:groups'] || [],
         expiresAt: payload.exp ? payload.exp * 1000 : Date.now() + expiresIn * 1000
       }
     : null
 
   if (refreshToken) {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ refreshToken }))
+    const stored = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}')
+    sessionStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ refreshToken, username: username || stored.username || user?.username })
+    )
   }
 }
 
 export const getStoredRefreshToken = () => {
   try {
     return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || 'null')?.refreshToken || null
+  } catch {
+    return null
+  }
+}
+
+export const getStoredUsername = () => {
+  try {
+    return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || 'null')?.username || null
   } catch {
     return null
   }

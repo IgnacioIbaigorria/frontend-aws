@@ -2,6 +2,7 @@ import api, { apiError } from './api'
 import {
   clearAuthSession,
   getStoredRefreshToken,
+  getStoredUsername,
   setAuthSession
 } from './authStore'
 
@@ -15,7 +16,7 @@ export const login = async (username, password) => {
   try {
     const { data } = await api.post('/auth/login', { username, password })
     const session = normalizeAuthResponse(data)
-    setAuthSession(session)
+    setAuthSession({ ...session, username })
     return session
   } catch (error) {
     throw new Error(apiError(error, 'Usuario o contraseña incorrectos'))
@@ -24,14 +25,15 @@ export const login = async (username, password) => {
 
 export const refreshAccessToken = async () => {
   const refreshToken = getStoredRefreshToken()
-  if (!refreshToken) {
+  const username = getStoredUsername()
+  if (!refreshToken || !username) {
     throw new Error('No existe una sesión renovable')
   }
 
   try {
-    const { data } = await api.post('/auth/refresh', { refreshToken })
+    const { data } = await api.post('/auth/refresh', { refreshToken, username })
     const session = normalizeAuthResponse({ ...data, refreshToken })
-    setAuthSession(session)
+    setAuthSession({ ...session, username })
     return session
   } catch (error) {
     clearAuthSession()
