@@ -5,7 +5,8 @@ export const ROLE_LABELS = {
   MANAGER: 'Manager',
   SELLER: 'Vendedor',
   INVENTORY_MANAGER: 'Encargado de inventario',
-  AUDITOR: 'Auditor'
+  AUDITOR: 'Auditor',
+  GUEST: 'Invitado (solo lectura)'
 }
 
 export const roleLabel = (role) => ROLE_LABELS[role] || role
