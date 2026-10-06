@@ -27,3 +27,4 @@ React 18 + Vite 5 SPA (JSX, no TypeScript) — stock management UI. Spanish-lang
 
 - **No `.gitignore` exists** — `git add .` would commit `node_modules/`. Add one (`node_modules/`, `dist/`) before the first commit.
 - S3 static hosting must use `index.html` as the **error document** too, or react-router deep links (e.g. `/products`) 404.
+- **GitHub MCP**: When querying repositories via GitHub MCP, try `search_code` first. If it fails (e.g. due to token permissions or authentication issues), fall back to `get_file_contents`.
