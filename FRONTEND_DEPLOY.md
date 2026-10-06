@@ -235,7 +235,8 @@ jobs:
             --content-type "text/html"
       - name: Warn if CloudFront invalidation is not configured
         if: env.CLOUDFRONT_ID == ''
-        run: echo "::warning::Secreto CLOUDFRONT_ID no definido: se omite la invalidacion de CloudFront y el HTML viejo puede servirse hasta 24 h."
+        run: |
+          echo "::warning::Secreto CLOUDFRONT_ID no definido: se omite la invalidacion de CloudFront y el HTML viejo puede servirse hasta 24 h."
       - name: Invalidate CloudFront cache
         if: env.CLOUDFRONT_ID != ''
         run: aws cloudfront create-invalidation --distribution-id "${{ secrets.CLOUDFRONT_ID }}" --paths "/*"

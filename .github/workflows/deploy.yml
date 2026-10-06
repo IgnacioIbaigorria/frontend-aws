@@ -90,7 +90,8 @@ jobs:
 
       - name: Warn if CloudFront invalidation is not configured
         if: env.CLOUDFRONT_ID == ''
-        run: echo "::warning::Secreto CLOUDFRONT_ID no definido: se omite la invalidacion de CloudFront y el HTML viejo puede servirse hasta 24 h. Configurarlo en Settings > Secrets and variables > Actions."
+        run: |
+          echo "::warning::Secreto CLOUDFRONT_ID no definido: se omite la invalidacion de CloudFront y el HTML viejo puede servirse hasta 24 h. Configurarlo en Settings > Secrets and variables > Actions."
 
       - name: Invalidate CloudFront cache
         if: env.CLOUDFRONT_ID != ''
