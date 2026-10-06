@@ -3,16 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Icon from '../components/Icon'
 
-const PASSWORD_RULES = [
-  { id: 'length', label: 'Al menos 8 caracteres', test: (p) => p.length >= 8 },
-  { id: 'uppercase', label: 'Al menos una letra mayúscula', test: (p) => /[A-Z]/.test(p) },
-  { id: 'lowercase', label: 'Al menos una letra minúscula', test: (p) => /[a-z]/.test(p) },
-]
-
-function validatePassword(password) {
-  return PASSWORD_RULES.map((rule) => ({ ...rule, valid: rule.test(password) }))
-}
-
 function Login() {
   const { signIn } = useAuth()
   const navigate = useNavigate()
@@ -21,9 +11,6 @@ function Login() {
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-
-  const passwordRules = validatePassword(form.password)
-  const isPasswordValid = passwordRules.every((r) => r.valid)
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -36,11 +23,6 @@ function Login() {
 
     if (!form.username.trim() || !form.password) {
       setError('Completá tu usuario y contraseña.')
-      return
-    }
-
-    if (!isPasswordValid) {
-      setError('La contraseña no cumple con todos los requisitos de seguridad.')
       return
     }
 
@@ -94,7 +76,6 @@ function Login() {
                 value={form.password}
                 onChange={handleChange}
                 disabled={isSubmitting}
-                aria-describedby="password-rules"
               />
               <button
                 type="button"
@@ -107,18 +88,6 @@ function Login() {
                 <Icon name={showPassword ? 'eye-off' : 'eye'} size={18} />
               </button>
             </div>
-            {form.password.length > 0 && (
-              <ul className="password-rules" id="password-rules" aria-live="polite">
-                {passwordRules.map((rule) => (
-                  <li key={rule.id} className={rule.valid ? 'valid' : 'invalid'}>
-                    <span className="password-rule-icon" aria-hidden="true">
-                      {rule.valid ? '✓' : '○'}
-                    </span>
-                    {rule.label}
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
           {error && <p className="auth-error" role="alert">{error}</p>}
           <button className="btn btn-primary auth-submit" type="submit" disabled={isSubmitting}>

@@ -445,38 +445,6 @@ input::placeholder {
   font-size: 0.8125rem;
 }
 
-/* ——— Password rules ——— */
-.password-rules {
-  list-style: none;
-  margin-top: 0.5rem;
-  padding: 0;
-  font-size: 0.75rem;
-  line-height: 1.6;
-}
-
-.password-rules li {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  color: var(--ink-soft);
-  transition: color var(--transition-fast);
-}
-
-.password-rules li.valid {
-  color: var(--success);
-}
-
-.password-rules li.invalid {
-  color: var(--ink-soft);
-}
-
-.password-rule-icon {
-  font-size: 0.6875rem;
-  width: 1rem;
-  text-align: center;
-  flex: none;
-}
-
 .auth-loading {
   min-height: 100vh;
   display: grid;
