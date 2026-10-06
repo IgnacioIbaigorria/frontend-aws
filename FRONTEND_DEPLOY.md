@@ -222,8 +222,20 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+      # index.html nunca debe cachearse: los bundles tienen hash y --delete los
+      # reemplaza en cada deploy; un HTML cacheado apunta a assets que ya no
+      # existen -> 404 en el navegador. Los assets con hash sí son inmutables.
       - name: Sync to S3
-        run: aws s3 sync dist/ "s3://${{ secrets.S3_BUCKET }}" --delete
+        run: |
+          aws s3 sync dist/ "s3://${{ secrets.S3_BUCKET }}" --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "index.html"
+          aws s3 cp dist/index.html "s3://${{ secrets.S3_BUCKET }}/index.html" \
+            --cache-control "no-cache" \
+            --content-type "text/html"
+      - name: Warn if CloudFront invalidation is not configured
+        if: env.CLOUDFRONT_ID == ''
+        run: echo "::warning::Secreto CLOUDFRONT_ID no definido: se omite la invalidacion de CloudFront y el HTML viejo puede servirse hasta 24 h."
       - name: Invalidate CloudFront cache
         if: env.CLOUDFRONT_ID != ''
         run: aws cloudfront create-invalidation --distribution-id "${{ secrets.CLOUDFRONT_ID }}" --paths "/*"
@@ -246,11 +258,11 @@ jobs:
 | `AWS_ACCESS_KEY_ID` | Si no usas OIDC | Access Key del usuario `github-deploy` |
 | `AWS_SECRET_ACCESS_KEY` | Si no usas OIDC | Secret Access Key |
 | `AWS_ROLE_ARN` | Opcional (OIDC) | ARN del rol IAM (si lo creaste) |
-| `CLOUDFRONT_ID` | Opcional | ID de tu distribución CloudFront (ej: `E123ABC45XYZ`) |
+| `CLOUDFRONT_ID` | ✅ Sí (en producción) | ID de tu distribución CloudFront (ej: `E123ABC45XYZ`). **Sin este secreto el pipeline omite la invalidación** y CloudFront sirve el HTML anterior hasta 24 h después de cada deploy (assets viejos → 404). El workflow emite un warning si falta. |
 
 ---
 
-## Paso 5: Crear distribución CloudFront (opcional pero recomendado)
+## Paso 5: Crear distribución CloudFront (requerido en producción)
 
 1. Ve a AWS Console → **CloudFront** → **Create distribution**
 2. **Origin domain**: selecciona tu bucket S3
@@ -308,9 +320,11 @@ yarn install --frozen-lockfile
 yarn build
 
 # Subir frontend manualmente (sin CI/CD)
-aws s3 sync dist/ s3://tu-bucket --delete
+aws s3 sync dist/ s3://tu-bucket --delete \
+  --cache-control "public, max-age=31536000, immutable" --exclude "index.html"
+aws s3 cp dist/index.html s3://tu-bucket/index.html --cache-control "no-cache" --content-type "text/html"
 
-# Invalidar caché de CloudFront
+# Invalidar caché de CloudFront (obligatorio tras cada deploy si no corre el paso automático)
 aws cloudfront create-invalidation --distribution-id TU_ID --paths "/*"
 
 # Ver logs del backend en EC2
@@ -337,7 +351,8 @@ cd ~/backend && docker-compose logs -f
 - [ ] Bucket S3 creado con acceso público y static website hosting
 - [ ] Bucket policy configurada
 - [ ] Usuario IAM o rol OIDC creado (Step 2)
-- [ ] Secrets configurados en GitHub (`S3_BUCKET` + credenciales AWS)
-- [ ] CloudFront distribution creada (opcional)
+- [ ] Secrets configurados en GitHub (`S3_BUCKET` + credenciales AWS + `CLOUDFRONT_ID`)
+- [ ] CloudFront distribution creada (el frontend se sirve vía CloudFront en producción)
+- [ ] Secreto `CLOUDFRONT_ID` = ID real de la distribución (si no, la invalidación se omite y el HTML viejo da 404)
 - [ ] Security group de EC2 permite puerto 3000 y CORS habilitado en el backend
 - [ ] Primer push a `main` → deploy automático funcionando

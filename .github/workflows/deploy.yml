@@ -76,8 +76,21 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      # index.html nunca debe cachearse: los bundles tienen hash y --delete los
+      # reemplaza en cada deploy; un HTML cacheado apunta a assets que ya no
+      # existen -> 404 en el navegador. Los assets con hash sí son inmutables.
       - name: Sync to S3
-        run: aws s3 sync dist/ "s3://${{ secrets.S3_BUCKET }}" --delete
+        run: |
+          aws s3 sync dist/ "s3://${{ secrets.S3_BUCKET }}" --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "index.html"
+          aws s3 cp dist/index.html "s3://${{ secrets.S3_BUCKET }}/index.html" \
+            --cache-control "no-cache" \
+            --content-type "text/html"
+
+      - name: Warn if CloudFront invalidation is not configured
+        if: env.CLOUDFRONT_ID == ''
+        run: echo "::warning::Secreto CLOUDFRONT_ID no definido: se omite la invalidacion de CloudFront y el HTML viejo puede servirse hasta 24 h. Configurarlo en Settings > Secrets and variables > Actions."
 
       - name: Invalidate CloudFront cache
         if: env.CLOUDFRONT_ID != ''
