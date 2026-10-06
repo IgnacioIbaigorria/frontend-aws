@@ -21,17 +21,13 @@ const NAV = [
   { to: '/history', label: 'Historial' }
 ]
 
-function App() {
+function AppShell() {
   const location = useLocation()
   const { user, signOut } = useAuth()
 
   return (
-    <ToastProvider>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route element={<ProtectedRoute />}>
-          <Route element={<div className="app">
-            <aside className="sidebar">
+    <div className="app">
+      <aside className="sidebar">
           <div className="brand">
             <span className="brand-mark" aria-hidden="true" />
             <div>
@@ -54,40 +50,50 @@ function App() {
             <span className="session-user">{user?.username || 'Usuario'}</span>
             <button className="btn btn-ghost btn-small session-logout" onClick={signOut}>Cerrar sesión</button>
           </div>
-        </aside>
+      </aside>
 
-        <div className="main-wrap">
-          <header className="topbar">
-            <span className="brand-mark" aria-hidden="true" />
-            <div>
-              <span className="logo">Stock</span>
-              <span className="brand-caption">Control de inventario</span>
-            </div>
-            <button className="btn btn-ghost btn-small mobile-logout" onClick={signOut}>Salir</button>
-          </header>
-          <nav className="mobile-nav" aria-label="Navegación principal">
-            {NAV.map((item) => (
-              <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'active' : undefined)}>
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
+      <div className="main-wrap">
+        <header className="topbar">
+          <span className="brand-mark" aria-hidden="true" />
+          <div>
+            <span className="logo">Stock</span>
+            <span className="brand-caption">Control de inventario</span>
+          </div>
+          <button className="btn btn-ghost btn-small mobile-logout" onClick={signOut}>Salir</button>
+        </header>
+        <nav className="mobile-nav" aria-label="Navegación principal">
+          {NAV.map((item) => (
+            <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'active' : undefined)}>
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
 
-          <main className="main-content" key={location.pathname}>
-            <Routes>
-              <Route path="/" element={<Navigate to="/products" replace />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/sales" element={<Sales />} />
-              <Route path="/caja" element={<Caja />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/tags" element={<Tags />} />
-              <Route path="/reposicion" element={<Reposicion />} />
-              <Route path="/history" element={<History />} />
-              <Route path="*" element={<Navigate to="/products" replace />} />
-            </Routes>
-          </main>
-        </div>
-          </div>} />
+        <main className="main-content" key={location.pathname}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/products" replace />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/sales" element={<Sales />} />
+            <Route path="/caja" element={<Caja />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/tags" element={<Tags />} />
+            <Route path="/reposicion" element={<Reposicion />} />
+            <Route path="/history" element={<History />} />
+            <Route path="*" element={<Navigate to="/products" replace />} />
+          </Routes>
+        </main>
+      </div>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <ToastProvider>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/*" element={<AppShell />} />
         </Route>
         <Route path="/" element={<Navigate to="/products" replace />} />
         <Route path="*" element={<Navigate to="/products" replace />} />
