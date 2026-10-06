@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { clearAuthSession, getAccessToken, getStoredRefreshToken, setAuthSession } from './authStore'
 
 const api = axios.create({
   baseURL: '/api',
@@ -14,6 +15,23 @@ api.interceptors.response.use(
     const config = error.config
     const method = config?.method?.toLowerCase()
     const status = error.response?.status
+
+    if (status === 401 && config && !config._authRetry && !config.url?.includes('/auth/')) {
+      const refreshToken = getStoredRefreshToken()
+      if (refreshToken) {
+        config._authRetry = true
+        try {
+          const { data } = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refreshToken })
+          setAuthSession({ ...data, refreshToken })
+          config.headers.Authorization = `Bearer ${getAccessToken()}`
+          return api(config)
+        } catch {
+          clearAuthSession()
+          window.dispatchEvent(new Event('auth:expired'))
+        }
+      }
+    }
+
     const retryableStatus = !status || [408, 429, 500, 502, 503, 504].includes(status)
 
     if (!config || method !== 'get' || !retryableStatus) {
@@ -31,12 +49,20 @@ api.interceptors.response.use(
   }
 )
 
+api.interceptors.request.use((config) => {
+  const token = getAccessToken()
+  if (token && !config.url?.includes('/auth/')) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
 export default api
 
 /** Extrae el mensaje de error del backend (NestJS devuelve { message } o { error }) */
-export const apiError = (err) => {
+export const apiError = (err, fallback = 'No se pudo conectar con el servidor') => {
   const data = err.response?.data
   if (data?.message) return data.message
   if (data?.error) return data.error
-  return 'No se pudo conectar con el servidor'
+  return fallback
 }

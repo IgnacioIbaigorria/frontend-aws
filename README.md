@@ -82,6 +82,18 @@ La aplicación se compila como una SPA estática. Vite genera los archivos final
 
 Las llamadas HTTP del frontend se centralizan en `src/services/api.js` y utilizan la ruta base `/api`. En desarrollo, Vite puede redirigir esa ruta al backend local en `http://localhost:3000`. En producción, la distribución debe enrutar `/api` hacia el backend desplegado.
 
+## Autenticación
+
+La aplicación usa el flujo BFF de Cognito implementado por el backend:
+
+- `POST /auth/login` recibe `username` y `password`.
+- `POST /auth/refresh` recibe el `refreshToken`.
+- Las demás requests envían el `accessToken` como `Authorization: Bearer <token>`.
+
+El access token se mantiene en memoria y el refresh token se conserva únicamente en `sessionStorage`, por lo que no se comparte entre pestañas persistentes ni sobrevive al cierre del navegador. Ante un `401`, el cliente intenta renovar la sesión una sola vez y, si falla, limpia la sesión y devuelve al usuario al login. La autenticación de la interfaz no reemplaza la autorización del backend: los roles y permisos siguen siendo responsabilidad de los guards de NestJS.
+
+El backend debe dejar públicos `/auth/login` y `/auth/refresh`; si el guard JWT global protege también esas rutas, ningún usuario puede iniciar o renovar una sesión.
+
 Para conocer la implementación de la API, los modelos, endpoints, base de datos y despliegue del servidor, consultá el [repositorio del backend NestJS](https://github.com/IgnacioIbaigorria/backend_NestJS).
 
 ## Estructura principal
