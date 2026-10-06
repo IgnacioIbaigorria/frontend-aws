@@ -4,6 +4,10 @@ Aplicación web para administrar productos, ventas, caja e inventario desde un �
 
 **[Abrir la aplicación en producción](https://d1hjojyfabiyi5.cloudfront.net/)**
 
+Código fuente de este frontend:
+
+**[IgnacioIbaigorria/frontend-aws](https://github.com/IgnacioIbaigorria/frontend-aws)**
+
 El backend que provee la API vive en un repositorio separado:
 
 **[Ver backend NestJS](https://github.com/IgnacioIbaigorria/backend_NestJS)**
@@ -31,6 +35,8 @@ El objetivo es ofrecer una herramienta simple para pequeños comercios o emprend
 - **Reposición:** registro de cantidades, proveedores y costos.
 - **Categorías y etiquetas:** organización del catálogo.
 - **Historial:** seguimiento de cambios realizados sobre los productos.
+- **Usuarios y roles:** alta, edición, reseteo de contraseña y asignación de permisos (solo ADMIN).
+- **Acceso por roles:** navegación y acciones filtradas según el rol del usuario.
 - **Diseño responsive:** navegación y tablas adaptadas a pantallas móviles.
 
 ## Stack tecnológico
@@ -96,6 +102,26 @@ El backend debe dejar públicos `/auth/login` y `/auth/refresh`; si el guard JWT
 
 Para conocer la implementación de la API, los modelos, endpoints, base de datos y despliegue del servidor, consultá el [repositorio del backend NestJS](https://github.com/IgnacioIbaigorria/backend_NestJS).
 
+## Roles y permisos
+
+La aplicación controla el acceso por roles (grupos de Cognito) en dos capas:
+
+1. **Backend (fuente de verdad):** cada endpoint lleva `@Roles(...)` y el `RolesGuard` responde `403` si el JWT no contiene el grupo requerido.
+2. **Frontend (UX):** la navegación y las rutas se filtran según el rol, y los botones de escritura quedan deshabilitados para el rol invitado.
+
+| Módulo | ADMIN | MANAGER | INVENTORY_MANAGER | SELLER | GUEST |
+|---|:---:|:---:|:---:|:---:|:---:|
+| Productos | CRUD | CRUD | CRUD | Lectura | Lectura |
+| Ventas | CRUD | CRUD | Lectura | Crear + Lectura | Lectura |
+| Categorías | CRUD | CRUD | Lectura | Lectura | Lectura |
+| Etiquetas | CRUD | CRUD | Lectura | Lectura | Lectura |
+| Reposición | CRUD | CRUD | CRUD | — | Lectura |
+| Historial | Lectura | Lectura | Lectura | — | Lectura |
+| Caja | CRUD | CRUD | — | — | Lectura |
+| Usuarios | CRUD | — | — | — | — |
+
+El rol se infiere del JWT (`cognito:groups`). Después de cambiar los permisos de un usuario hay que cerrar sesión y volver a entrar para que el token nuevo refleje los grupos.
+
 ## Usuario invitado (modo prueba)
 
 Para probar el sistema sin crear usuarios nuevos existe un usuario invitado ya creado en Cognito:
@@ -122,9 +148,10 @@ Consideraciones de seguridad:
 │       └── deploy.yml       # Build y despliegue automático
 ├── src/
 │   ├── components/          # Componentes compartidos
+│   ├── context/             # Contexto de autenticación (roles, sesión)
 │   ├── pages/               # Pantallas de la aplicación
 │   ├── services/            # Cliente HTTP y servicios
-│   ├── utils/               # Utilidades de formato
+│   ├── utils/               # Utilidades de formato y etiquetas de roles
 │   ├── App.jsx              # Rutas y layout principal
 │   ├── main.jsx             # Punto de entrada
 │   └── index.css            # Sistema visual y responsive
