@@ -1,6 +1,19 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import Icon from '../components/Icon'
+
+const PASSWORD_RULES = [
+  { id: 'length', label: 'Al menos 8 caracteres', test: (p) => p.length >= 8 },
+  { id: 'uppercase', label: 'Al menos una letra mayúscula', test: (p) => /[A-Z]/.test(p) },
+  { id: 'lowercase', label: 'Al menos una letra minúscula', test: (p) => /[a-z]/.test(p) },
+  { id: 'number', label: 'Al menos un número', test: (p) => /\d/.test(p) },
+  { id: 'special', label: 'Al menos un carácter especial', test: (p) => /[^A-Za-z0-9]/.test(p) },
+]
+
+function validatePassword(password) {
+  return PASSWORD_RULES.map((rule) => ({ ...rule, valid: rule.test(password) }))
+}
 
 function Login() {
   const { signIn } = useAuth()
@@ -9,6 +22,10 @@ function Login() {
   const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+
+  const passwordRules = validatePassword(form.password)
+  const isPasswordValid = passwordRules.every((r) => r.valid)
 
   const handleChange = (event) => {
     const { name, value } = event.target
@@ -21,6 +38,11 @@ function Login() {
 
     if (!form.username.trim() || !form.password) {
       setError('Completá tu usuario y contraseña.')
+      return
+    }
+
+    if (!isPasswordValid) {
+      setError('La contraseña no cumple con todos los requisitos de seguridad.')
       return
     }
 
@@ -65,15 +87,40 @@ function Login() {
           </div>
           <div className="form-group">
             <label htmlFor="password">Contraseña</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              value={form.password}
-              onChange={handleChange}
-              disabled={isSubmitting}
-            />
+            <div className="password-field">
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                value={form.password}
+                onChange={handleChange}
+                disabled={isSubmitting}
+                aria-describedby="password-rules"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((current) => !current)}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-pressed={showPassword}
+                disabled={isSubmitting}
+              >
+                <Icon name={showPassword ? 'eye-off' : 'eye'} size={18} />
+              </button>
+            </div>
+            {form.password.length > 0 && (
+              <ul className="password-rules" id="password-rules" aria-live="polite">
+                {passwordRules.map((rule) => (
+                  <li key={rule.id} className={rule.valid ? 'valid' : 'invalid'}>
+                    <span className="password-rule-icon" aria-hidden="true">
+                      {rule.valid ? '✓' : '○'}
+                    </span>
+                    {rule.label}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
           {error && <p className="auth-error" role="alert">{error}</p>}
           <button className="btn btn-primary auth-submit" type="submit" disabled={isSubmitting}>
@@ -86,4 +133,3 @@ function Login() {
 }
 
 export default Login
-
