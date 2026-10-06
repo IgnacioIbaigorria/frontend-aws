@@ -96,6 +96,23 @@ El backend debe dejar públicos `/auth/login` y `/auth/refresh`; si el guard JWT
 
 Para conocer la implementación de la API, los modelos, endpoints, base de datos y despliegue del servidor, consultá el [repositorio del backend NestJS](https://github.com/IgnacioIbaigorria/backend_NestJS).
 
+## Usuario invitado (modo prueba)
+
+Para probar el sistema sin crear usuarios nuevos existe un usuario invitado ya creado en Cognito:
+
+| Campo | Valor |
+|---|---|
+| Usuario | `Invitado` |
+| Contraseña | `Invitado1.` |
+
+El rol `GUEST` es de **solo lectura**: puede consultar productos, ventas, caja, reposiciones, categorías, etiquetas e historial, pero no puede crear, editar ni eliminar nada. Esa restricción está aplicada en el backend (guards de roles de NestJS), no solo oculta en la interfaz, así que el invitado no puede modificar datos aunque intente llamar a la API directamente.
+
+Consideraciones de seguridad:
+
+- Las credenciales son públicas a propósito: cualquier persona con acceso a este repositorio o a la aplicación puede iniciar sesión con ese usuario.
+- El invitado **sí ve datos sensibles**: ventas, ingresos, gastos y balance de caja. Si la instancia contiene datos reales de un comercio, conviene deshabilitar al usuario `Invitado` (o rotarle la contraseña) cuando no se lo esté usando para pruebas.
+- La contraseña del invitado no da acceso a administración de usuarios ni a escritura sobre el catálogo: esos endpoints exigen rol `ADMIN` o roles con permiso de escritura.
+
 ## Estructura principal
 
 ```text
