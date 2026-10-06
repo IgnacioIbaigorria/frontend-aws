@@ -7,6 +7,8 @@ import { useTheme } from './context/ThemeContext'
 import Icon from './components/Icon'
 import { roleLabel } from './utils/roles'
 import Products from './pages/Products'
+import ProductDetail from './pages/ProductDetail'
+import ProductForm from './pages/ProductForm'
 import Sales from './pages/Sales'
 import Caja from './pages/Caja'
 import Categories from './pages/Categories'
@@ -138,6 +140,9 @@ function AppShell() {
           <Routes>
             <Route path="/" element={<Navigate to="/products" replace />} />
             <Route path="/products" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER', 'GUEST']) ? <Products /> : <Navigate to="/products" replace />} />
+            <Route path="/products/new" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER']) ? <ProductForm /> : <Navigate to="/products" replace />} />
+            <Route path="/products/:id" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER', 'GUEST']) ? <ProductDetail /> : <Navigate to="/products" replace />} />
+            <Route path="/products/:id/edit" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER']) ? <ProductForm /> : <Navigate to="/products" replace />} />
             <Route path="/sales" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER', 'GUEST']) ? <Sales /> : <Navigate to="/products" replace />} />
             <Route path="/caja" element={canAccess(['ADMIN', 'MANAGER', 'GUEST']) ? <Caja /> : <Navigate to="/products" replace />} />
             <Route path="/categories" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER', 'GUEST']) ? <Categories /> : <Navigate to="/products" replace />} />
