@@ -446,6 +446,9 @@ input::placeholder {
 
 /* ——— Buttons ——— */
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 44px;
   padding: 0.5625rem 1.125rem;
   border: 1px solid transparent;
@@ -455,6 +458,10 @@ input::placeholder {
   font-weight: 500;
   cursor: pointer;
   transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn .icon {
+  flex: none;
 }
 
 .btn-primary {
@@ -560,26 +567,72 @@ input::placeholder {
   margin-top: 2rem;
   padding-top: 1rem;
   border-top: 1px solid rgba(237, 239, 230, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.session-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .session-user {
   display: block;
   color: #F7F8F1;
   font-size: 0.8125rem;
-  margin: 0 0 0.625rem 1rem;
+  margin: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* Toggle de tema en el sidebar: fila completa, visible */
+.theme-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5625rem 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(237, 239, 230, 0.18);
+  border-radius: var(--radius-md);
+  color: rgba(237, 239, 230, 0.85);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.theme-toggle-row:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(237, 239, 230, 0.35);
+}
+
+.theme-toggle-row .icon {
+  flex: none;
+  color: var(--marigold);
+}
+
+/* Cerrar sesión: rojo ladrillo para que sea significativo */
 .session-logout {
-  color: rgba(237, 239, 230, 0.72);
-  border-color: rgba(237, 239, 230, 0.25);
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(180, 67, 46, 0.18);
+  color: #F2B8AB;
+  border-color: rgba(242, 184, 171, 0.35);
   width: 100%;
 }
 
 .session-logout:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(180, 67, 46, 0.38);
+  color: #FFE4DC;
+  border-color: rgba(255, 228, 220, 0.55);
 }
 
 .mobile-logout {
@@ -1010,10 +1063,16 @@ td.muted {
   }
 
   .mobile-logout {
-    display: block;
-    margin-left: auto;
-    color: rgba(237, 239, 230, 0.8);
-    border-color: rgba(237, 239, 230, 0.25);
+    display: inline-flex;
+    background: rgba(180, 67, 46, 0.25);
+    color: #F2B8AB;
+    border-color: rgba(242, 184, 171, 0.4);
+    gap: 0.375rem;
+  }
+
+  .mobile-logout:hover {
+    background: rgba(180, 67, 46, 0.45);
+    color: #FFE4DC;
   }
 
   .mobile-nav {

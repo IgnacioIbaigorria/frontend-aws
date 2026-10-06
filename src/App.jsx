@@ -25,15 +25,25 @@ const NAV = [
   { to: '/users', label: 'Usuarios', icon: 'users', adminOnly: true },
 ]
 
-function ThemeToggle() {
+function ThemeToggle({ variant = 'icon' }) {
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === 'dark'
+  const label = isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'
+
+  if (variant === 'full') {
+    return (
+      <button className="theme-toggle-row" onClick={toggleTheme} aria-label={label}>
+        <Icon name={isDark ? 'sun' : 'moon'} size={16} />
+        {isDark ? 'Modo claro' : 'Modo oscuro'}
+      </button>
+    )
+  }
 
   return (
     <button
       className="theme-toggle"
       onClick={toggleTheme}
-      aria-label={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+      aria-label={label}
       title={isDark ? 'Modo claro' : 'Modo oscuro'}
     >
       <Icon name={isDark ? 'sun' : 'moon'} size={18} />
@@ -70,9 +80,12 @@ function AppShell() {
           </ul>
         </nav>
         <div className="session-panel">
-          <span className="session-user">{user?.username || 'Usuario'}</span>
-          <button className="btn btn-ghost btn-small session-logout" onClick={signOut}>
-            <Icon name="logout" size={14} />
+          <div className="session-user-row">
+            <span className="session-user">{user?.username || 'Usuario'}</span>
+          </div>
+          <ThemeToggle variant="full" />
+          <button className="btn session-logout" onClick={signOut}>
+            <Icon name="logout" size={16} />
             Cerrar sesión
           </button>
         </div>
