@@ -15,14 +15,14 @@ import History from './pages/History'
 import Users from './pages/Users'
 
 const NAV = [
-  { to: '/products', label: 'Productos', icon: 'box' },
-  { to: '/sales', label: 'Ventas', icon: 'sales' },
-  { to: '/caja', label: 'Caja', icon: 'caja' },
-  { to: '/categories', label: 'Categorías', icon: 'categories' },
-  { to: '/tags', label: 'Etiquetas', icon: 'tags' },
-  { to: '/reposicion', label: 'Reposición', icon: 'reposicion' },
-  { to: '/history', label: 'Historial', icon: 'history' },
-  { to: '/users', label: 'Usuarios', icon: 'users', adminOnly: true },
+  { to: '/products', label: 'Productos', icon: 'box', roles: ['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER'] },
+  { to: '/sales', label: 'Ventas', icon: 'sales', roles: ['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER'] },
+  { to: '/caja', label: 'Caja', icon: 'caja', roles: ['ADMIN', 'MANAGER'] },
+  { to: '/categories', label: 'Categorías', icon: 'categories', roles: ['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER'] },
+  { to: '/tags', label: 'Etiquetas', icon: 'tags', roles: ['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER'] },
+  { to: '/reposicion', label: 'Reposición', icon: 'reposicion', roles: ['ADMIN', 'MANAGER', 'INVENTORY_MANAGER'] },
+  { to: '/history', label: 'Historial', icon: 'history', roles: ['ADMIN', 'MANAGER', 'INVENTORY_MANAGER'] },
+  { to: '/users', label: 'Usuarios', icon: 'users', roles: ['ADMIN'] },
 ]
 
 function ThemeToggle({ variant = 'icon' }) {
@@ -54,8 +54,10 @@ function ThemeToggle({ variant = 'icon' }) {
 function AppShell() {
   const location = useLocation()
   const { user, signOut } = useAuth()
-  const isAdmin = user?.groups?.includes('ADMIN')
-  const visibleNav = NAV.filter((item) => !item.adminOnly || isAdmin)
+  const userGroups = user?.groups || []
+  const visibleNav = NAV.filter((item) => item.roles.some((role) => userGroups.includes(role)))
+
+  const canAccess = (roles) => roles.some((role) => userGroups.includes(role))
 
   return (
     <div className="app">
@@ -118,14 +120,14 @@ function AppShell() {
         <main className="main-content" key={location.pathname}>
           <Routes>
             <Route path="/" element={<Navigate to="/products" replace />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/sales" element={<Sales />} />
-            <Route path="/caja" element={<Caja />} />
-            <Route path="/categories" element={<Categories />} />
-            <Route path="/tags" element={<Tags />} />
-            <Route path="/reposicion" element={<Reposicion />} />
-            <Route path="/history" element={<History />} />
-            <Route path="/users" element={isAdmin ? <Users /> : <Navigate to="/products" replace />} />
+            <Route path="/products" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER']) ? <Products /> : <Navigate to="/products" replace />} />
+            <Route path="/sales" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER']) ? <Sales /> : <Navigate to="/products" replace />} />
+            <Route path="/caja" element={canAccess(['ADMIN', 'MANAGER']) ? <Caja /> : <Navigate to="/products" replace />} />
+            <Route path="/categories" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER']) ? <Categories /> : <Navigate to="/products" replace />} />
+            <Route path="/tags" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER', 'SELLER']) ? <Tags /> : <Navigate to="/products" replace />} />
+            <Route path="/reposicion" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER']) ? <Reposicion /> : <Navigate to="/products" replace />} />
+            <Route path="/history" element={canAccess(['ADMIN', 'MANAGER', 'INVENTORY_MANAGER']) ? <History /> : <Navigate to="/products" replace />} />
+            <Route path="/users" element={canAccess(['ADMIN']) ? <Users /> : <Navigate to="/products" replace />} />
             <Route path="*" element={<Navigate to="/products" replace />} />
           </Routes>
         </main>
