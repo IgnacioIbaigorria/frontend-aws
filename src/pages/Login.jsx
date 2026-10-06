@@ -8,7 +8,6 @@ const PASSWORD_RULES = [
   { id: 'uppercase', label: 'Al menos una letra mayúscula', test: (p) => /[A-Z]/.test(p) },
   { id: 'lowercase', label: 'Al menos una letra minúscula', test: (p) => /[a-z]/.test(p) },
   { id: 'number', label: 'Al menos un número', test: (p) => /\d/.test(p) },
-  { id: 'special', label: 'Al menos un carácter especial', test: (p) => /[^A-Za-z0-9]/.test(p) },
 ]
 
 function validatePassword(password) {
