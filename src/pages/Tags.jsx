@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import api, { apiError } from '../services/api'
 import { useToast } from '../components/Toaster'
+import { useAuth } from '../context/AuthContext'
 
 function Tags() {
   const toast = useToast()
+  const { isGuest } = useAuth()
   const [tags, setTags] = useState([])
   const [editing, setEditing] = useState(null)
   const [name, setName] = useState('')
@@ -70,7 +72,7 @@ function Tags() {
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button type="submit" className="btn btn-primary">{editing ? 'Guardar cambios' : 'Crear etiqueta'}</button>
+            <button type="submit" className="btn btn-primary" disabled={isGuest}>{editing ? 'Guardar cambios' : 'Crear etiqueta'}</button>
             {editing && (
               <button type="button" className="btn btn-ghost" onClick={() => { setEditing(null); setName('') }}>
                 Cancelar
@@ -99,8 +101,8 @@ function Tags() {
                     <td className="product-name" data-label="Nombre">{t.name}</td>
                     <td data-label="Acciones">
                       <div style={{ display: 'flex', gap: '0.375rem' }}>
-                        <button className="btn btn-ghost btn-small" onClick={() => handleEdit(t)}>Editar</button>
-                        <button className="btn btn-danger btn-small" onClick={() => handleDelete(t.id)}>Eliminar</button>
+                        <button className="btn btn-ghost btn-small" onClick={() => handleEdit(t)} disabled={isGuest}>Editar</button>
+                        <button className="btn btn-danger btn-small" onClick={() => handleDelete(t.id)} disabled={isGuest}>Eliminar</button>
                       </div>
                     </td>
                   </tr>

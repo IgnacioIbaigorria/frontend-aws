@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import api, { apiError } from '../services/api'
 import { money, num, fmtDate } from '../utils/format'
 import { useToast } from '../components/Toaster'
+import { useAuth } from '../context/AuthContext'
 
 const emptyForm = () => ({
   name: '',
@@ -18,6 +19,7 @@ const isLow = (p) => num(p.stock) <= num(p.minStock)
 
 function Products() {
   const toast = useToast()
+  const { isGuest } = useAuth()
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [tags, setTags] = useState([])
@@ -206,7 +208,7 @@ function Products() {
             </div>
           </div>
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary">{editing ? 'Guardar cambios' : 'Crear producto'}</button>
+            <button type="submit" className="btn btn-primary" disabled={isGuest}>{editing ? 'Guardar cambios' : 'Crear producto'}</button>
             {editing && (
               <button type="button" className="btn btn-ghost" onClick={() => { setEditing(null); setForm(emptyForm()) }}>
                 Cancelar
@@ -265,8 +267,8 @@ function Products() {
                       <td className="muted" data-label="Etiquetas">{p.tags?.map((t) => t.name).join(', ') || '-'}</td>
                       <td data-label="Acciones">
                         <div style={{ display: 'flex', gap: '0.375rem' }}>
-                          <button className="btn btn-ghost btn-small" onClick={() => handleEdit(p)} aria-label={`Editar ${p.name}`}>Editar</button>
-                          <button className="btn btn-danger btn-small" onClick={() => handleDelete(p.id)} aria-label={`Eliminar ${p.name}`}>Eliminar</button>
+                          <button className="btn btn-ghost btn-small" onClick={() => handleEdit(p)} disabled={isGuest} aria-label={`Editar ${p.name}`}>Editar</button>
+                          <button className="btn btn-danger btn-small" onClick={() => handleDelete(p.id)} disabled={isGuest} aria-label={`Eliminar ${p.name}`}>Eliminar</button>
                         </div>
                       </td>
                     </tr>

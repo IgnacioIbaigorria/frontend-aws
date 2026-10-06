@@ -47,13 +47,22 @@ export function AuthProvider({ children }) {
     setUser(null)
   }, [])
 
+  const hasRole = useCallback((...roles) => {
+    const groups = user?.groups || []
+    return roles.some((role) => groups.includes(role))
+  }, [user])
+
+  const isGuest = useCallback(() => hasRole('GUEST'), [hasRole])
+
   const value = useMemo(() => ({
     user,
     isLoading,
     isAuthenticated: Boolean(user),
+    hasRole,
+    isGuest: isGuest(),
     signIn,
     signOut
-  }), [user, isLoading, signIn, signOut])
+  }), [user, isLoading, hasRole, isGuest, signIn, signOut])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

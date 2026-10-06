@@ -2,9 +2,11 @@ import { useState, useEffect, useMemo } from 'react'
 import api, { apiError } from '../services/api'
 import { money, num, fmtDate, getTodayStr } from '../utils/format'
 import { useToast } from '../components/Toaster'
+import { useAuth } from '../context/AuthContext'
 
 function Sales() {
   const toast = useToast()
+  const { isGuest } = useAuth()
   const [sales, setSales] = useState([])
   const [products, setProducts] = useState([])
   const [search, setSearch] = useState('')
@@ -219,17 +221,17 @@ function Sales() {
                   onChange={(e) => updatePayment(index, 'amount', e.target.value)}
                   aria-label="Monto del pago"
                 />
-                <button type="button" className="btn-remove" onClick={() => removePayment(index)} aria-label="Quitar pago">
+                <button type="button" className="btn-remove" onClick={() => removePayment(index)} disabled={isGuest} aria-label="Quitar pago">
                   ×
                 </button>
               </div>
             ))}
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button type="button" className="btn-add-payment" onClick={addPayment}>
+              <button type="button" className="btn-add-payment" onClick={addPayment} disabled={isGuest}>
                 + Agregar otro pago
               </button>
               {!isBalanced && remaining > 0 && (
-                <button type="button" className="btn-add-payment" onClick={completePayment}>
+                <button type="button" className="btn-add-payment" onClick={completePayment} disabled={isGuest}>
                   Completar {money(remaining)}
                 </button>
               )}
@@ -243,7 +245,7 @@ function Sales() {
             </div>
           </div>
 
-          <button type="submit" className="btn btn-primary">Vender</button>
+          <button type="submit" className="btn btn-primary" disabled={isGuest}>Vender</button>
         </form>
       </div>
 

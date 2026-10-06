@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import api, { apiError } from '../services/api'
 import { money, num, fmtDate, getTodayStr } from '../utils/format'
 import { useToast } from '../components/Toaster'
+import { useAuth } from '../context/AuthContext'
 
 function Caja() {
   const toast = useToast()
+  const { isGuest } = useAuth()
   const [summary, setSummary] = useState(null)
   const [from, setFrom] = useState(getTodayStr)
   const [to, setTo] = useState(getTodayStr)
@@ -148,7 +150,7 @@ function Caja() {
                   />
                 </div>
               </div>
-              <button type="submit" className="btn btn-primary">Agregar gasto</button>
+              <button type="submit" className="btn btn-primary" disabled={isGuest}>Agregar gasto</button>
             </form>
           </div>
 
@@ -208,7 +210,7 @@ function Caja() {
                         <td className="num" data-label="Monto">{money(e.amount)}</td>
                         <td className="mono" data-label="Fecha">{fmtDate(e.createdAt)}</td>
                         <td data-label="Acciones">
-                          <button className="btn btn-danger btn-small" onClick={() => handleDeleteExpense(e.id)}>
+                          <button className="btn btn-danger btn-small" onClick={() => handleDeleteExpense(e.id)} disabled={isGuest}>
                             Eliminar
                           </button>
                         </td>

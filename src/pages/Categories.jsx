@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import api, { apiError } from '../services/api'
 import { fmtDate } from '../utils/format'
 import { useToast } from '../components/Toaster'
+import { useAuth } from '../context/AuthContext'
 
 function Categories() {
   const toast = useToast()
+  const { isGuest } = useAuth()
   const [categories, setCategories] = useState([])
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState({ name: '', description: '' })
@@ -87,7 +89,7 @@ function Categories() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button type="submit" className="btn btn-primary">{editing ? 'Guardar cambios' : 'Crear categoría'}</button>
+            <button type="submit" className="btn btn-primary" disabled={isGuest}>{editing ? 'Guardar cambios' : 'Crear categoría'}</button>
             {editing && (
               <button type="button" className="btn btn-ghost" onClick={() => { setEditing(null); setForm({ name: '', description: '' }) }}>
                 Cancelar
@@ -118,8 +120,8 @@ function Categories() {
                     <td className="muted" data-label="Descripción">{c.description || '-'}</td>
                     <td data-label="Acciones">
                       <div style={{ display: 'flex', gap: '0.375rem' }}>
-                        <button className="btn btn-ghost btn-small" onClick={() => handleEdit(c)}>Editar</button>
-                        <button className="btn btn-danger btn-small" onClick={() => handleDelete(c.id)}>Eliminar</button>
+                        <button className="btn btn-ghost btn-small" onClick={() => handleEdit(c)} disabled={isGuest}>Editar</button>
+                        <button className="btn btn-danger btn-small" onClick={() => handleDelete(c.id)} disabled={isGuest}>Eliminar</button>
                       </div>
                     </td>
                   </tr>

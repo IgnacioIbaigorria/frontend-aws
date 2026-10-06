@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import api, { apiError } from '../services/api'
 import { money, num, fmtDate } from '../utils/format'
 import { useToast } from '../components/Toaster'
+import { useAuth } from '../context/AuthContext'
 
 function Reposicion() {
   const toast = useToast()
+  const { isGuest } = useAuth()
   const [reposiciones, setReposiciones] = useState([])
   const [products, setProducts] = useState([])
   const [lowStock, setLowStock] = useState([])
@@ -87,7 +89,7 @@ function Reposicion() {
                   Stock {num(p.stock)} · mínimo {num(p.minStock)}
                 </div>
               </div>
-              <button type="button" className="btn btn-primary btn-small" onClick={() => prefill(p)}>
+              <button type="button" className="btn btn-primary btn-small" onClick={() => prefill(p)} disabled={isGuest}>
                 Reponer
               </button>
             </div>
@@ -144,7 +146,7 @@ function Reposicion() {
               />
             </div>
           </div>
-          <button type="submit" className="btn btn-primary">Registrar reposición</button>
+          <button type="submit" className="btn btn-primary" disabled={isGuest}>Registrar reposición</button>
         </form>
       </div>
 
