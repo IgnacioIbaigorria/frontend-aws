@@ -10,6 +10,7 @@ import {
   updateUser
 } from '../services/users'
 import { fmtDate } from '../utils/format'
+import { ROLE_OPTIONS } from '../utils/roles'
 
 const EMPTY_FORM = {
   username: '',
@@ -19,14 +20,6 @@ const EMPTY_FORM = {
   phoneNumber: '',
   roles: []
 }
-
-const ROLE_OPTIONS = [
-  { value: 'ADMIN', label: 'Administrador' },
-  { value: 'MANAGER', label: 'Manager' },
-  { value: 'SELLER', label: 'Vendedor' },
-  { value: 'INVENTORY_MANAGER', label: 'Encargado de inventario' },
-  { value: 'AUDITOR', label: 'Auditor' }
-]
 
 const PASSWORD_RULES = [
   { id: 'length', label: 'Entre 8 y 99 caracteres', test: (value) => value.length >= 8 && value.length <= 99 },

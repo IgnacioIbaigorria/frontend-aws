@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import { useAuth } from './context/AuthContext'
 import { useTheme } from './context/ThemeContext'
 import Icon from './components/Icon'
+import { roleLabel } from './utils/roles'
 import Products from './pages/Products'
 import Sales from './pages/Sales'
 import Caja from './pages/Caja'
@@ -59,6 +60,10 @@ function AppShell() {
 
   const canAccess = (roles) => roles.some((role) => userGroups.includes(role))
 
+  const displayName = user?.username || 'Usuario'
+  const initial = displayName.trim().charAt(0).toUpperCase() || 'U'
+  const primaryRole = userGroups.length ? roleLabel(userGroups[0]) : 'Sin permisos'
+
   return (
     <div className="app">
       <aside className="sidebar">
@@ -82,8 +87,12 @@ function AppShell() {
           </ul>
         </nav>
         <div className="session-panel">
-          <div className="session-user-row">
-            <span className="session-user">{user?.username || 'Usuario'}</span>
+          <div className="user-chip">
+            <span className="user-avatar" aria-hidden="true">{initial}</span>
+            <span className="user-id">
+              <span className="user-name">{displayName}</span>
+              <span className="user-role">{primaryRole}</span>
+            </span>
           </div>
           <ThemeToggle variant="full" />
           <button className="btn session-logout" onClick={signOut}>
@@ -101,6 +110,14 @@ function AppShell() {
             <span className="brand-caption">Control de inventario</span>
           </div>
           <div className="topbar-actions">
+            <span
+              className="user-avatar user-avatar-sm"
+              role="img"
+              aria-label={`Sesión de ${displayName}`}
+              title={`${displayName} · ${primaryRole}`}
+            >
+              {initial}
+            </span>
             <ThemeToggle />
             <button className="btn btn-ghost btn-small mobile-logout" onClick={signOut}>
               <Icon name="logout" size={14} />
