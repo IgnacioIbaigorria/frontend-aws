@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'stock-auth-session'
+export const STORAGE_KEY = 'stock-auth-session'
 
 let accessToken = null
 let user = null
@@ -24,7 +24,7 @@ export const getAccessToken = () => accessToken
 
 export const getCurrentUser = () => user
 
-export const setAuthSession = ({ accessToken: nextAccessToken, refreshToken, expiresIn, username }) => {
+export const setAuthSession = ({ accessToken: nextAccessToken, expiresIn = 3600, username }) => {
   accessToken = nextAccessToken
   const payload = decodeJwtPayload(nextAccessToken)
   user = payload
@@ -35,26 +35,18 @@ export const setAuthSession = ({ accessToken: nextAccessToken, refreshToken, exp
       }
     : null
 
-  if (refreshToken) {
-    const stored = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}')
-    sessionStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ refreshToken, username: username || stored.username || user?.username })
-    )
-  }
-}
-
-export const getStoredRefreshToken = () => {
-  try {
-    return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || 'null')?.refreshToken || null
-  } catch {
-    return null
-  }
+  // Se prioriza el username canónico de los claims del JWT: es el que Cognito
+  // exige para el SECRET_HASH de /auth/refresh, y puede diferir en mayúsculas
+  // del tipeado por el usuario (el login acepta cualquier case).
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({ username: user?.username || username || 'Usuario' })
+  )
 }
 
 export const getStoredUsername = () => {
   try {
-    return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || 'null')?.username || null
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')?.username || null
   } catch {
     return null
   }
@@ -63,6 +55,6 @@ export const getStoredUsername = () => {
 export const clearAuthSession = () => {
   accessToken = null
   user = null
-  sessionStorage.removeItem(STORAGE_KEY)
+  localStorage.removeItem(STORAGE_KEY)
 }
 

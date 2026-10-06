@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { clearAuthSession, getAccessToken, getStoredRefreshToken, getStoredUsername, setAuthSession } from './authStore'
+import { clearAuthSession, getAccessToken, getStoredUsername, setAuthSession } from './authStore'
 
 const api = axios.create({
   baseURL: '/api',
@@ -17,13 +17,13 @@ api.interceptors.response.use(
     const status = error.response?.status
 
     if (status === 401 && config && !config._authRetry && !config.url?.includes('/auth/')) {
-      const refreshToken = getStoredRefreshToken()
       const username = getStoredUsername()
-      if (refreshToken && username) {
+      if (username) {
         config._authRetry = true
         try {
-          const { data } = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { refreshToken, username })
-          setAuthSession({ ...data, refreshToken })
+          // El refresh token viaja como cookie HttpOnly (la adjunta el navegador)
+          const { data } = await axios.post(`${api.defaults.baseURL}/auth/refresh`, { username })
+          setAuthSession({ ...data, username })
           config.headers.Authorization = `Bearer ${getAccessToken()}`
           return api(config)
         } catch {

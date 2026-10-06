@@ -1,14 +1,12 @@
 import api, { apiError } from './api'
 import {
   clearAuthSession,
-  getStoredRefreshToken,
   getStoredUsername,
   setAuthSession
 } from './authStore'
 
 const normalizeAuthResponse = (data) => ({
   accessToken: data.accessToken,
-  refreshToken: data.refreshToken,
   expiresIn: data.expiresIn || 3600
 })
 
@@ -24,15 +22,16 @@ export const login = async (username, password) => {
 }
 
 export const refreshAccessToken = async () => {
-  const refreshToken = getStoredRefreshToken()
   const username = getStoredUsername()
-  if (!refreshToken || !username) {
+  if (!username) {
     throw new Error('No existe una sesión renovable')
   }
 
   try {
-    const { data } = await api.post('/auth/refresh', { refreshToken, username })
-    const session = normalizeAuthResponse({ ...data, refreshToken })
+    // El refresh token no viaja en el body: lo aporta el navegador en la
+    // cookie HttpOnly que seteó /auth/login (same-origin, con path /api/auth).
+    const { data } = await api.post('/auth/refresh', { username })
+    const session = normalizeAuthResponse(data)
     setAuthSession({ ...session, username })
     return session
   } catch (error) {
@@ -42,6 +41,9 @@ export const refreshAccessToken = async () => {
 }
 
 export const logout = () => {
+  // La cookie HttpOnly solo puede borrarla el servidor (el JS no la ve).
+  // Se limpia el estado local de inmediato y el pedido se dispara en segundo
+  // plano: si el backend no responde, la sesión local igual quedó cerrada.
   clearAuthSession()
+  api.post('/auth/logout').catch(() => {})
 }
-

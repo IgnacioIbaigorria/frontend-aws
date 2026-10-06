@@ -92,11 +92,12 @@ Las llamadas HTTP del frontend se centralizan en `src/services/api.js` y utiliza
 
 La aplicación usa el flujo BFF de Cognito implementado por el backend:
 
-- `POST /auth/login` recibe `username` y `password`.
-- `POST /auth/refresh` recibe el `refreshToken`.
+- `POST /auth/login` recibe `username` y `password`; devuelve el access token y setea el refresh token en una cookie `HttpOnly; SameSite=Strict`.
+- `POST /auth/refresh` renueva el access token: el refresh token lo aporta la cookie, el body solo envía `username`.
+- `POST /auth/logout` elimina la cookie de refresh en el servidor.
 - Las demás requests envían el `accessToken` como `Authorization: Bearer <token>`.
 
-El access token se mantiene en memoria y el refresh token se conserva únicamente en `sessionStorage`, por lo que no se comparte entre pestañas persistentes ni sobrevive al cierre del navegador. Ante un `401`, el cliente intenta renovar la sesión una sola vez y, si falla, limpia la sesión y devuelve al usuario al login. La autenticación de la interfaz no reemplaza la autorización del backend: los roles y permisos siguen siendo responsabilidad de los guards de NestJS.
+El access token (1 h) se mantiene solo en memoria y el refresh token vive únicamente en la cookie `HttpOnly`: el JavaScript del navegador nunca puede leerla, por lo que un XSS no puede robar la sesión persistente. `localStorage` guarda solamente el `username` (no es secreto). Cookie y API comparten origen (CloudFront `/api` en producción, proxy de Vite en desarrollo), así que la sesión sobrevive al cierre del navegador: al reabrirla se renueva el access token con la cookie guardada. Si la sesión se cierra en una pestaña, las demás pestañas también salen (evento `storage`). Ante un `401`, el cliente intenta renovar la sesión una sola vez y, si falla, limpia la sesión y devuelve al usuario al login. La autenticación de la interfaz no reemplaza la autorización del backend: los roles y permisos siguen siendo responsabilidad de los guards de NestJS.
 
 El backend debe dejar públicos `/auth/login` y `/auth/refresh`; si el guard JWT global protege también esas rutas, ningún usuario puede iniciar o renovar una sesión.
 
